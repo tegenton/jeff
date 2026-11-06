@@ -44,6 +44,9 @@ function listener(event) {
 	return;
     }
     switch (msg["type"]) {
+	case "host":
+	    // TODO: remove "waiting for host"
+	    break;
 	case "name":
 	    players[msg["hash"]] = [msg["name"], 0];
 	    break;

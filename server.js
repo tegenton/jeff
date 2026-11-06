@@ -10,6 +10,7 @@ const mimes = {
     '.html': 'text/html',
     '.css': 'text/css',
     '.js': 'application/javascript',
+    '.ico': 'image/vnd.microsoft.icon',
 };
 
 function hash(str) {
@@ -32,6 +33,12 @@ function player_listener(event) {
 	case "name":
 	    if (tv)
 		tv.send(JSON.stringify(msg));
+	    if (host)
+		host.send(JSON.stringify(msg));
+	    break;
+	case "bet":
+	case "final":
+	case "buzz":
 	    break;
 	default:
 	    console.error(`Unknown message type ${msg["type"]}`);
@@ -42,6 +49,38 @@ function player_listener(event) {
 }
 
 function host_listener(event) {
+    let msg;
+    let send_tv = true;
+    let send_players = true;
+    try {
+	msg = JSON.parse(event.data);
+    } catch (error) {
+	console.error(`Could not parse json from ${event.data}`);
+	return;
+    }
+    switch (msg["type"]) {
+	case "score":
+	case "buzz":
+	    players[msg["hash"]].send(msg);
+	case "answer":
+	    send_players = false;
+	    break;
+	case "final":
+	case "categories":
+	    //tv.send(JSON.stringify({"type": "categories", "categories": ["a", "b", "c", "d", "e"], "double": true}));
+	    break;
+	default:
+	    console.error(`Unknown message type ${msg["type"]}`);
+	    return;
+    }
+    if (send_tv && tv)
+	tv.send(JSON.stringify(msg));
+    if (send_players) {
+	for (const player of Object.keys(players)) {
+	    players[player].send(JSON.stringify(msg));
+	}
+    }
+
 }
 
 function serve(res, resolved) {
@@ -100,6 +139,7 @@ wserver.on('connection', (ws, req) => {
 	    }
 
 	    host = ws;
+	    host.addEventListener('close', () => {host = null;});
 	    host.addEventListener('message', host_listener);
 	    if (players && Object.keys(players).length > 0) {
 		for (const player of Object.keys(players)) {
@@ -121,14 +161,12 @@ wserver.on('connection', (ws, req) => {
 	    tv = ws;
 	    tv.addEventListener('close', () => {tv = null;});
 	    for (const player of Object.keys(players)) {
-		console.log(player);
 		players[player].send(JSON.stringify({"type": "name"}));
 	    }
 	    if (host) {
 		host.send(JSON.stringify({"type": "tv"}));
 		tv.send(JSON.stringify({"type": "host"}));
 	    }
-	    //tv.send(JSON.stringify({"type": "categories", "categories": ["a", "b", "c", "d", "e"], "double": true}));
 	    return;
 	case '/player':
 	    let player_hash = hash(ws);

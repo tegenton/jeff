@@ -1,1 +1,21 @@
-sample text
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeffpardy (HOST)</title>
+    <script src="host/host.js"></script>
+</head>
+<body>
+    <h1>Jeopardy</h1>
+    <h2 id="waiting">Connecting to Server...</h1>
+    <div id="board">
+	<form action="javascript:submit()">
+	    <label for="boardjs">Pick a board</label>
+	    <input type="file" id="boardjs">
+	    <input type="submit" value="Submit">
+	</form>
+    </div>
+    <div id="question"></div>
+    <div id="players"></div>
+</body>
+</html>

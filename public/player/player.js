@@ -6,6 +6,7 @@ let wager = false;
 
 function submit() {
     if (wager) {
+	//socket.send(JSON.stringify({"type": "final", "hash": hash, "guess": guess, "wager": wager}));
     } else {
 	const form = document.getElementById('form');
 	name = form.children[0].value;
