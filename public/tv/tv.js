@@ -2,7 +2,7 @@ const socket = new WebSocket('tv');
 
 let players = {};
 
-function createTable(data) {
+function createBoard(data) {
     const board_div = document.getElementById("board");
     if (board_div.children[0])
 	board_div.children[0].remove();
@@ -51,7 +51,7 @@ function listener(event) {
 	    players[msg["hash"]] = [msg["name"], 0];
 	    break;
 	case "categories":
-	    createTable(msg);
+	    createBoard(msg);
 	    break;
 	default:
 	    console.error(`Unknown message type ${msg["type"]}`);

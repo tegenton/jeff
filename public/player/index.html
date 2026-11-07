@@ -10,8 +10,13 @@
     <div id="score"></div>
     <div id="entry">
 	<h2 id="waiting">Waiting to connect...</h2>
-	<form id="form" action="javascript:submit()"></form>
+	<form id="form" action="javascript:submit()" style="display: none;">
+	    <input type="number" style="display: none;">
+	    <input>
+	    <input type="submit" value="Submit Name">
+	</form>
     </div>
+    <button style="display: none;" onclick="buzz()">BUZZ</button>
     <div id="board"></div>
 </body>
 </html>

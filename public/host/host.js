@@ -7,6 +7,7 @@ let picker;
 let board;
 
 function validBoard(js) {
+    // TODO: some more junk to make sure its cool
     return true;
     if (!("single" in js))
 	return false;
@@ -20,7 +21,6 @@ function validBoard(js) {
 	return false;
     if (js["final"].length != 3)
 	return false;
-    // TODO: some more junk to make sure its cool
 }
 
 function renderBoard(b) {
@@ -49,9 +49,7 @@ function renderBoard(b) {
 	row = body.insertRow();
 	for (let cat of Object.keys(b)) {
 	    let cell = row.insertCell();
-	    console.log(b[cat][i]["question"]);
 	    cell.textContent = b[cat][i]["question"];
-	    console.log(cell);
 	}
 	row = body.insertRow();
 	for (let cat of Object.keys(b)) {
@@ -67,7 +65,6 @@ function renderGame() {
     if (board_div.children[0])
 	board_div.children[0].remove();
     
-    console.log("wow");
     const game = document.createElement('div');
     const fin = document.createElement('table');
     game.appendChild(renderBoard(board["single"]));
@@ -102,14 +99,31 @@ function submit() {
 	    if (validBoard(js)) {
 		board = js;
 		renderGame();
+		socket.send(JSON.stringify({"type": "categories", "categories": Object.keys(board["single"])}));
 	    }
 	}
 	reader.readAsText(input.files[0]);
     }
 }
 
+function start() {
+    console.log("starting");
+    let rand = Math.floor(Math.random() * Object.keys(players).length);
+    picker = Object.keys(players)[rand];
+    nextQuestion();
+}
+
 function nextQuestion() {
-    socket.send(JSON.stringify({"type": "question", "hash": picker}));
+    socket.send(JSON.stringify({"type": "pick", "hash": picker}));
+}
+
+function addPlayer(id) {
+    const player_div = document.getElementById("players");
+    let player = document.createElement("p");
+    player.textContent = players[id][0];
+    player_div.appendChild(player);
+    const start_button = document.getElementById("start_button");
+    start_button.style.display = "";
 }
 
 function listener(event) {
@@ -126,6 +140,7 @@ function listener(event) {
 	    break;
 	case "name":
 	    players[msg["hash"]] = [msg["name"], 0];
+	    addPlayer(msg["hash"]);
 	    break;
 	case "buzz":
 	    buzzed.push(msg["hash"]);

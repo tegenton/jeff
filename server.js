@@ -29,16 +29,16 @@ function player_listener(event) {
 	console.error(`Could not parse json from ${event.data}`);
 	return;
     }
+    console.log(`player: ${JSON.stringify(msg)}`);
     switch (msg["type"]) {
 	case "name":
+	case "pick":
 	    if (tv)
 		tv.send(JSON.stringify(msg));
-	    if (host)
-		host.send(JSON.stringify(msg));
 	    break;
 	case "bet":
-	case "final":
 	case "buzz":
+	case "final":
 	    break;
 	default:
 	    console.error(`Unknown message type ${msg["type"]}`);
@@ -50,24 +50,27 @@ function player_listener(event) {
 
 function host_listener(event) {
     let msg;
-    let send_tv = true;
     let send_players = true;
+    let send_tv = true;
     try {
 	msg = JSON.parse(event.data);
     } catch (error) {
 	console.error(`Could not parse json from ${event.data}`);
 	return;
     }
+    console.log(`host: ${JSON.stringify(msg)}`);
     switch (msg["type"]) {
+	case "pick":
+	    send_tv = false;
 	case "score":
 	case "buzz":
-	    players[msg["hash"]].send(msg);
+	    players[msg["hash"]].send(JSON.stringify(msg));
 	case "answer":
 	    send_players = false;
 	    break;
 	case "final":
+	case "question":
 	case "categories":
-	    //tv.send(JSON.stringify({"type": "categories", "categories": ["a", "b", "c", "d", "e"], "double": true}));
 	    break;
 	default:
 	    console.error(`Unknown message type ${msg["type"]}`);
@@ -143,7 +146,6 @@ wserver.on('connection', (ws, req) => {
 	    host.addEventListener('message', host_listener);
 	    if (players && Object.keys(players).length > 0) {
 		for (const player of Object.keys(players)) {
-		    host.send(JSON.stringify({"type": "player", "hash": player}));
 		    players[player].send(JSON.stringify({"type": "name"}));
 		}
 		if (tv) {
